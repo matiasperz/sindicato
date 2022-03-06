@@ -35,6 +35,16 @@ test("rle letters should be the letters with their count", () => {
   ]);
 });
 
+test("rle shouldn't group separated repeated letters in one position", () => {
+  expect(rle("abbcccbbbb")).toEqual([
+    ["a", 1],
+    ["b", 2],
+    ["c", 3],
+    ["b", 4],
+  ]);
+});
+
+
 // this is just an example of a property-based-test
 it("sum is commutative", () => {
   const commutativity = fc.property(
@@ -47,3 +57,22 @@ it("sum is commutative", () => {
 
   fc.assert(commutativity, { verbose: true });
 });
+
+it("sum of char groups should be equal to total length", () => {
+  const integerConfig = { min: 1, max: 100 }
+
+  fc.assert(fc.property(
+    fc.integer(integerConfig),
+    fc.integer(integerConfig),
+    fc.integer(integerConfig),
+    (a: number,b: number,c: number) => {
+      const totalLength = a + b + c;
+
+      const encoded = rle("a".repeat(a) + "b".repeat(b) + "c".repeat(c))
+      const encodedTotalLength = encoded.reduce((acc, [char, count]) => acc + count, 0);
+
+      return totalLength === encodedTotalLength;
+    }
+  ), { verbose: true });
+});
+
